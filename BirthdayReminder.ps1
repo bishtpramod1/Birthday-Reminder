@@ -11,7 +11,7 @@ $TelegramChatId   = $env:TELEGRAM_CHAT_ID
 # Today's date
 $Today = Get-Date
 
-Write-Host "Checking birthdays for $($Today.ToString('dd/MM/yyyy'))..."
+Write-Host "Checking birthdays for $($Today.ToString('yyyy/MM/dd'))..."
 
 # Validate secrets
 if ([string]::IsNullOrWhiteSpace($TelegramBotToken)) {
@@ -31,7 +31,7 @@ $TodaysBirthdays = foreach ($Person in $Birthdays) {
     try {
         $DOB = [datetime]::ParseExact(
             $Person.'Date of Birth',
-            @("d/M/yyyy", "dd/MM/yyyy"),
+            @("yyyy/M/d", "yyyy/MM/dd"),
             [System.Globalization.CultureInfo]::InvariantCulture,
             [System.Globalization.DateTimeStyles]::None
         )
