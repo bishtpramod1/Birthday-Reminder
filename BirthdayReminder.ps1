@@ -4,14 +4,17 @@
 
 $CsvPath = Join-Path $PSScriptRoot "birthday.csv"
 
+# Telegram configuration
 $TelegramBotToken = $env:TELEGRAM_BOT_TOKEN
 $TelegramChatId   = $env:TELEGRAM_CHAT_ID
 
+# Today's date
 $Today = Get-Date
 
 Write-Host "Checking birthdays for $($Today.ToString('dd/MM/yyyy'))..."
 
-if ([string]::IsNullOrWhiteSpacemBotToken)) {
+# Validate secrets
+if (:IsNullOrWhiteSpace($TelegramBotToken)) {
     throw "TELEGRAM_BOT_TOKEN is not configured."
 }
 
@@ -19,23 +22,15 @@ if (:IsNullOrWhiteSpace($TelegramChatId)) {
     throw "TELEGRAM_CHAT_ID is not configured."
 }
 
+# Read CSV
 $Birthdays = Import-Csv $CsvPath
 
+# Find today's birthdays
 $TodaysBirthdays = foreach ($Person in $Birthdays) {
 
     try {
 
-        $DobValue = $null
-
-        if ($Person.PSObject.Properties["Date of Birth"]) {
-            $DobValue = $Person.'Date of Birth'
-        }
-        elseif ($Person.PSObject.Properties["DOB"]) {
-            $DobValue = $Person.DOB
-        }
-        elseif ($Person.PSObject.Properties["DateOfBirth"]) {
-            $DobValue = $Person.DateOfBirth
-        }
+        $DobValue = $Person.'Date of Birth'
 
         if (:IsNullOrWhiteSpace($DobValue)) {
             Write-Warning "DOB missing for $($Person.Name)"
@@ -52,6 +47,10 @@ $TodaysBirthdays = foreach ($Person in $Birthdays) {
         Write-Warning "Invalid DOB: $DobValue for $($Person.Name)"
     }
 }
+
+# ==========================================
+# Send Telegram message
+# ==========================================
 
 if ($TodaysBirthdays) {
 
@@ -76,12 +75,19 @@ $($BirthdayLines -join "`n")
         text    = $Message
     }
 
-    Invoke-RestMethod `
-        -Uri $TelegramUrl `
-        -Method Post `
-        -Body $Body
+    try {
+        Invoke-RestMethod `
+            -Uri $TelegramUrl `
+            -Method Post `
+            -Body $Body
 
-    Write-Host "Telegram birthday message sent successfully."
+        Write-Host "Telegram birthday message sent successfully."
+    }
+    catch {
+        Write-Error "Failed to send Telegram message."
+        Write-Error $_
+        exit 1
+    }
 }
 else {
     Write-Host "Aaj kisi ka birthday nahi hai."
