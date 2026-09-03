@@ -1,4 +1,4 @@
-```powershell
+
 # ==========================================
 # Birthday Reminder - Telegram
 # ==========================================
@@ -116,4 +116,3 @@ else {
 
     Write-Host "Aaj kisi ka birthday nahi hai."
 }
-```
